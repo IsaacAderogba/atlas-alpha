@@ -14,11 +14,57 @@ export class Parser {
 
   /**
    * Program
-   *  : Literal
+   *  : StatementList
    *  ;
    */
   private Program() {
-    return ASTFactory.Program(this.Literal());
+    return ASTFactory.Program(this.StatementList());
+  }
+
+  /**
+   * StatementList
+   *  : Statement
+   *  | StatementList Statement -> Statement Statement...
+   *  ;
+   */
+  private StatementList() {
+    const statementList = [this.Statement()];
+
+    while (this.lookahead !== null) {
+      statementList.push(this.Statement());
+    }
+
+    return statementList;
+  }
+
+  /**
+   * Statement
+   *  : ExpressionStatement
+   *  ;
+   */
+  private Statement() {
+    return this.ExpressionStatement();
+  }
+
+  /**
+   * ExpressionStatement
+   *  : Expression ';'
+   *  ;
+   */
+  private ExpressionStatement() {
+    const expression = this.Expression();
+    this.eat(TokenType.SEMICOLON);
+
+    return ASTFactory.ExpressionStatement(expression);
+  }
+
+  /**
+   * Expression
+   *  : Literal
+   *  ;
+   */
+  private Expression() {
+    return this.Literal();
   }
 
   /**
@@ -33,8 +79,9 @@ export class Parser {
         return this.NumericLiteral();
       case TokenType.STRING:
         return this.StringLiteral();
+      default:
+        throw new SyntaxError(`Literal: unexpected literal production`);
     }
-    throw new SyntaxError(`Literal: unexpected literal production`);
   }
 
   /**

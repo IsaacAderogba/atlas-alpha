@@ -1,5 +1,6 @@
 export enum ASTNode {
   Program = "Program",
+  ExpressionStatement = "ExpressionStatement",
   NumericLiteral = "NumericLiteral",
   StringLiteral = "StringLiteral",
 }
@@ -20,5 +21,9 @@ export const ASTFactory: {
   StringLiteral: (value: string) => ({
     type: ASTNode.StringLiteral,
     value,
+  }),
+  ExpressionStatement: (expression: string) => ({
+    type: ASTNode.ExpressionStatement,
+    expression,
   }),
 };
