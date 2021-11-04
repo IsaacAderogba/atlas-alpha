@@ -1,13 +1,14 @@
 import { TokenType } from "./TokenType";
 
-interface TokenNode {
-  type: TokenType;
-  value: any;
-}
-
 export const TokenFactory: {
-  [key in keyof typeof TokenType]: (value: any) => TokenNode;
+  [key in keyof typeof TokenType]: (value: any) => {
+    type: TokenType;
+  };
 } = {
+  Program: (body: any) => ({
+    type: TokenType.Program,
+    body,
+  }),
   NumericLiteral: (value: number) => ({
     type: TokenType.NumericLiteral,
     value,

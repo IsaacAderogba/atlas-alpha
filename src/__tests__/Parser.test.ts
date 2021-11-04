@@ -7,6 +7,12 @@ describe("Root test", () => {
     const ast = parser.parse(program);
 
     // assert
-    console.log(JSON.stringify(ast, null, 2))
+    expect(ast).toEqual({
+      type: "Program",
+      body: {
+        type: "NumericLiteral",
+        value: 42,
+      },
+    });
   });
 });

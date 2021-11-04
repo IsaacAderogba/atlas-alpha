@@ -14,7 +14,7 @@ export class Parser {
    *  ;
    */
   private Program() {
-    return this.NumericLiteral();
+    return TokenFactory.Program(this.NumericLiteral());
   }
 
   /**
