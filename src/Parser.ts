@@ -24,7 +24,7 @@ export class Parser {
   /**
    * StatementList
    *  : Statement
-   *  | StatementList Statement -> Statement Statement...
+   *  | StatementList Statement
    *  ;
    */
   private StatementList(stopLookahead: TokenType | null = null): ASTNode[] {
@@ -62,7 +62,7 @@ export class Parser {
    */
   private EmptyStatement(): ASTNode {
     this.eat(TokenType.SEMICOLON);
-    return ASTFactory.EmptyStatement()
+    return ASTFactory.EmptyStatement();
   }
 
   /**
@@ -95,11 +95,78 @@ export class Parser {
 
   /**
    * Expression
-   *  : Literal
+   *  : AdditiveExpression
    *  ;
    */
   private Expression(): ASTNode {
-    return this.Literal();
+    return this.AdditiveExpression();
+  }
+
+  /**
+   * AdditiveExpression
+   *  : MultiplicativeExpression
+   *  | AdditiveExpression ADDITIVE_OPERATOR MultiplicativeExpression
+   *  ;
+   */
+  private AdditiveExpression(): ASTNode {
+    return this.BinaryExpression(
+      () => this.MultiplicativeExpression(),
+      TokenType.ADDITIVE_OPERATOR
+    );
+  }
+
+  /**
+   * MultiplicativeExpression
+   *  : PrimaryExpression
+   *  | MultiplicativeExpression ADDITIVE_OPERATOR PrimaryExpression
+   *  ;
+   */
+  private MultiplicativeExpression(): ASTNode {
+    return this.BinaryExpression(
+      () => this.PrimaryExpression(),
+      TokenType.MULTIPLICATIVE_OPERATOR
+    );
+  }
+
+  private BinaryExpression(callback: () => ASTNode, operatorToken: TokenType) {
+    let left = callback();
+
+    while (this.lookahead?.type === operatorToken) {
+      const operator = this.eat(operatorToken).value;
+      const right = callback();
+
+      left = ASTFactory.BinaryExpression(operator, left, right);
+    }
+
+    return left;
+  }
+
+  /**
+   * PrimaryExpression
+   *  : Literal
+   *  | ParenthesizedExpression
+   *  ;
+   */
+  private PrimaryExpression(): ASTNode {
+    switch (this.lookahead?.type) {
+      case TokenType.LEFT_PAREN:
+        return this.ParenthesizedExpression();
+      default:
+        return this.Literal();
+    }
+  }
+
+  /**
+   * ParenthesizedExpression
+   *  : '(' Expression ')'
+   *  ;
+   */
+  private ParenthesizedExpression(): ASTNode {
+    this.eat(TokenType.LEFT_PAREN);
+    const expression = this.Expression();
+    this.eat(TokenType.RIGHT_PAREN);
+
+    return expression;
   }
 
   /**

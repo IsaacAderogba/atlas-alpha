@@ -1,10 +1,13 @@
 export enum TokenType {
-  // single character tokens
   SEMICOLON = ";",
   LEFT_BRACE = "{",
   RIGHT_BRACE = "}",
-  
-  // literals
+  LEFT_PAREN = "(",
+  RIGHT_PAREN = ")",
+
+  ADDITIVE_OPERATOR = "ADDITIVE_OPERATOR",
+  MULTIPLICATIVE_OPERATOR = "MULTIPLICATIVE_OPERATOR",
+
   NUMBER = "NUMBER",
   STRING = "STRING",
 }
@@ -17,6 +20,11 @@ const TokenSpec = [
   [/^;/, TokenType.SEMICOLON],
   [/^\{/, TokenType.LEFT_BRACE],
   [/^\}/, TokenType.RIGHT_BRACE],
+  [/^\(/, TokenType.LEFT_PAREN],
+  [/^\)/, TokenType.RIGHT_PAREN],
+
+  [/^[+\-]/, TokenType.ADDITIVE_OPERATOR],
+  [/^[*\/]/, TokenType.MULTIPLICATIVE_OPERATOR],
 
   [/^\d+/, TokenType.NUMBER],
   [/^"[^"]*"/, TokenType.STRING],
