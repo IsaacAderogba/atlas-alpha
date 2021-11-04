@@ -1,4 +1,4 @@
-import { ASTFactory } from "./ASTFactory";
+import { ASTFactory, ASTNodeType } from "./ASTFactory";
 import { Token, Tokenizer, TokenType } from "./Tokenizer";
 
 export class Parser {
@@ -27,10 +27,10 @@ export class Parser {
    *  | StatementList Statement -> Statement Statement...
    *  ;
    */
-  private StatementList() {
+  private StatementList(stopLookahead: TokenType | null = null): ASTNodeType[] {
     const statementList = [this.Statement()];
 
-    while (this.lookahead !== null) {
+    while (this.lookahead !== null && this.lookahead.type !== stopLookahead) {
       statementList.push(this.Statement());
     }
 
@@ -40,10 +40,45 @@ export class Parser {
   /**
    * Statement
    *  : ExpressionStatement
+   *  | BlockStatement
+   *  | EmptyStatement
    *  ;
    */
-  private Statement() {
-    return this.ExpressionStatement();
+  private Statement(): ASTNodeType {
+    switch (this.lookahead?.type) {
+      case TokenType.SEMICOLON:
+        return this.EmptyStatement();
+      case TokenType.LEFT_BRACE:
+        return this.BlockStatement();
+      default:
+        return this.ExpressionStatement();
+    }
+  }
+
+  /**
+   * EmptyStatement
+   *  : ';'
+   *  ;
+   */
+  private EmptyStatement(): ASTNodeType {
+    this.eat(TokenType.SEMICOLON);
+    return ASTFactory.EmptyStatement()
+  }
+
+  /**
+   * BlockStatement
+   *  : '{' OptStatementList '}'
+   *  ;
+   */
+  private BlockStatement(): ASTNodeType {
+    this.eat(TokenType.LEFT_BRACE);
+    const body =
+      this.lookahead?.type !== "}"
+        ? this.StatementList(TokenType.RIGHT_BRACE)
+        : [];
+    this.eat(TokenType.RIGHT_BRACE);
+
+    return ASTFactory.BlockStatement(body);
   }
 
   /**
@@ -51,7 +86,7 @@ export class Parser {
    *  : Expression ';'
    *  ;
    */
-  private ExpressionStatement() {
+  private ExpressionStatement(): ASTNodeType {
     const expression = this.Expression();
     this.eat(TokenType.SEMICOLON);
 
@@ -63,7 +98,7 @@ export class Parser {
    *  : Literal
    *  ;
    */
-  private Expression() {
+  private Expression(): ASTNodeType {
     return this.Literal();
   }
 
@@ -73,7 +108,7 @@ export class Parser {
    *  | StringLiteral
    *  ;
    */
-  private Literal() {
+  private Literal(): ASTNodeType {
     switch (this.lookahead?.type) {
       case TokenType.NUMBER:
         return this.NumericLiteral();
@@ -89,7 +124,7 @@ export class Parser {
    *  : STRING
    *  ;
    */
-  private StringLiteral() {
+  private StringLiteral(): ASTNodeType {
     const token = this.eat(TokenType.STRING)!;
     return ASTFactory.StringLiteral(token.value.slice(1, -1));
   }
@@ -99,7 +134,7 @@ export class Parser {
    *  : NUMBER
    *  ;
    */
-  private NumericLiteral() {
+  private NumericLiteral(): ASTNodeType {
     const token = this.eat(TokenType.NUMBER)!;
     return ASTFactory.NumericLiteral(Number(token.value));
   }

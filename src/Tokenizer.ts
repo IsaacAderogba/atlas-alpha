@@ -1,6 +1,9 @@
 export enum TokenType {
   // single character tokens
   SEMICOLON = ";",
+  LEFT_BRACE = "{",
+  RIGHT_BRACE = "}",
+  
   // literals
   NUMBER = "NUMBER",
   STRING = "STRING",
@@ -12,6 +15,8 @@ const TokenSpec = [
   [/^\/\*[\s\S]*?\*\//, null],
 
   [/^;/, TokenType.SEMICOLON],
+  [/^\{/, TokenType.LEFT_BRACE],
+  [/^\}/, TokenType.RIGHT_BRACE],
 
   [/^\d+/, TokenType.NUMBER],
   [/^"[^"]*"/, TokenType.STRING],
