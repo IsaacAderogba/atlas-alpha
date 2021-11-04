@@ -4,6 +4,8 @@ export enum ASTNodeType {
   BlockStatement = "BlockStatement",
   EmptyStatement = "EmptyStatement",
   BinaryExpression = "BinaryExpression",
+  AssignmentExpression = "AssignmentExpression",
+  Identifier = "Identifier",
   NumericLiteral = "NumericLiteral",
   StringLiteral = "StringLiteral",
 }
@@ -39,6 +41,12 @@ export const ASTFactory: {
     left,
     right,
   }),
+  AssignmentExpression: (operator, left, right) => ({
+    type: ASTNodeType.AssignmentExpression,
+    operator,
+    left,
+    right,
+  }),
   NumericLiteral: (value: number) => ({
     type: ASTNodeType.NumericLiteral,
     value,
@@ -46,5 +54,9 @@ export const ASTFactory: {
   StringLiteral: (value: string) => ({
     type: ASTNodeType.StringLiteral,
     value,
+  }),
+  Identifier: (name) => ({
+    type: ASTNodeType.Identifier,
+    name,
   }),
 };

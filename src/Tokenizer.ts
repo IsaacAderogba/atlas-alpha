@@ -4,31 +4,46 @@ export enum TokenType {
   RIGHT_BRACE = "}",
   LEFT_PAREN = "(",
   RIGHT_PAREN = ")",
-
+  
+  SIMPLE_ASSIGN = "SIMPLE_ASSIGN",
+  COMPLEX_ASSIGN = "COMPLEX_ASSIGN",
   ADDITIVE_OPERATOR = "ADDITIVE_OPERATOR",
   MULTIPLICATIVE_OPERATOR = "MULTIPLICATIVE_OPERATOR",
 
   NUMBER = "NUMBER",
   STRING = "STRING",
+
+  IDENTIFIER = "IDENTIFIER",
 }
 
 const TokenSpec = [
+  // whitespace, comments
   [/^\s+/, null],
   [/^\/\/.*/, null],
   [/^\/\*[\s\S]*?\*\//, null],
 
+  // symbols, delimiters
   [/^;/, TokenType.SEMICOLON],
   [/^\{/, TokenType.LEFT_BRACE],
   [/^\}/, TokenType.RIGHT_BRACE],
   [/^\(/, TokenType.LEFT_PAREN],
   [/^\)/, TokenType.RIGHT_PAREN],
 
+  // assignment operators
+  [/^=/, TokenType.SIMPLE_ASSIGN],
+  [/^[\*\/\+\-]=/, TokenType.COMPLEX_ASSIGN],
+
+  // math operators
   [/^[+\-]/, TokenType.ADDITIVE_OPERATOR],
   [/^[*\/]/, TokenType.MULTIPLICATIVE_OPERATOR],
 
+  // literals
   [/^\d+/, TokenType.NUMBER],
   [/^"[^"]*"/, TokenType.STRING],
   [/^'[^']*'/, TokenType.STRING],
+
+  // identifiers
+  [/^\w+/, TokenType.IDENTIFIER],
 ] as const;
 
 export interface Token {

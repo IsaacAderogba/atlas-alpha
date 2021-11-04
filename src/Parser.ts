@@ -1,4 +1,4 @@
-import { ASTFactory, ASTNode } from "./ASTFactory";
+import { ASTFactory, ASTNode, ASTNodeType } from "./ASTFactory";
 import { Token, Tokenizer, TokenType } from "./Tokenizer";
 
 export class Parser {
@@ -95,11 +95,77 @@ export class Parser {
 
   /**
    * Expression
-   *  : AdditiveExpression
+   *  : AssignmentExpression
    *  ;
    */
   private Expression(): ASTNode {
-    return this.AdditiveExpression();
+    return this.AssignmentExpression();
+  }
+
+  /**
+   * AssignmentExpression
+   *  : AdditiveExpression
+   *  | LeftHandSideExpression AssignmentOperator AssignmentExpression
+   *  ;
+   */
+  private AssignmentExpression(): ASTNode {
+    const left = this.AdditiveExpression();
+
+    if (!this.isAssignmentOperator(this.lookahead?.type!)) {
+      return left;
+    }
+
+    return ASTFactory.AssignmentExpression(
+      this.AssignmentOperator().value,
+      this.checkValidAssignmentTarget(left),
+      this.AssignmentExpression()
+    );
+  }
+
+  /**
+   * LeftHandSideExpression
+   *  : Identifier
+   *  ;
+   */
+  private LeftHandSideExpression(): ASTNode {
+    return this.Identifier();
+  }
+
+  /**
+   * Identifier
+   *  : IDENTIFIER
+   *  ;
+   */
+  private Identifier() {
+    const name = this.eat(TokenType.IDENTIFIER).value;
+    return ASTFactory.Identifier(name);
+  }
+
+  private checkValidAssignmentTarget(node: ASTNode) {
+    if (node.type === ASTNodeType.Identifier) {
+      return node;
+    }
+    throw new SyntaxError("Invalid left-hand side in assignment expression");
+  }
+
+  private isAssignmentOperator(tokenType: TokenType) {
+    return (
+      tokenType === TokenType.SIMPLE_ASSIGN ||
+      tokenType === TokenType.COMPLEX_ASSIGN
+    );
+  }
+
+  /**
+   * AssignmentOperator
+   *  : SIMPLE_ASSIGN
+   *  | COMPLEX_ASSIGN
+   *  ;
+   */
+  private AssignmentOperator(): Token {
+    if (this.lookahead?.type === TokenType.SIMPLE_ASSIGN) {
+      return this.eat(TokenType.SIMPLE_ASSIGN);
+    }
+    return this.eat(TokenType.COMPLEX_ASSIGN);
   }
 
   /**
@@ -145,15 +211,24 @@ export class Parser {
    * PrimaryExpression
    *  : Literal
    *  | ParenthesizedExpression
+   *  | LeftHandSideExpression
    *  ;
    */
   private PrimaryExpression(): ASTNode {
+    if (this.isLiteral(this.lookahead?.type!)) {
+      return this.Literal();
+    }
+
     switch (this.lookahead?.type) {
       case TokenType.LEFT_PAREN:
         return this.ParenthesizedExpression();
       default:
-        return this.Literal();
+        return this.LeftHandSideExpression();
     }
+  }
+
+  private isLiteral(tokenType: TokenType) {
+    return tokenType === TokenType.NUMBER || tokenType === TokenType.STRING;
   }
 
   /**
