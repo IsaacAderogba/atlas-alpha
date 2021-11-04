@@ -1,7 +1,14 @@
 describe("Root test", () => {
   it("should work", () => {
     // arrange
-    const program = `42`;
+    const program = `
+
+    // number
+    /**
+     * Comment
+     */
+    "42"
+    `;
 
     // act
     const ast = parser.parse(program);
@@ -10,8 +17,8 @@ describe("Root test", () => {
     expect(ast).toEqual({
       type: "Program",
       body: {
-        type: "NumericLiteral",
-        value: 42,
+        type: "StringLiteral",
+        value: "42",
       },
     });
   });
