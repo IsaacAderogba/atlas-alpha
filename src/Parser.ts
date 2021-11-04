@@ -118,7 +118,7 @@ export class Parser {
   /**
    * MultiplicativeExpression
    *  : PrimaryExpression
-   *  | MultiplicativeExpression ADDITIVE_OPERATOR PrimaryExpression
+   *  | MultiplicativeExpression MULTIPLICATIVE_OPERATOR PrimaryExpression
    *  ;
    */
   private MultiplicativeExpression(): ASTNode {
