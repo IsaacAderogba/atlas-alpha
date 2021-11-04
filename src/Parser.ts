@@ -42,6 +42,7 @@ export class Parser {
    *  : ExpressionStatement
    *  | BlockStatement
    *  | EmptyStatement
+   *  | VariableStatement
    *  ;
    */
   private Statement(): ASTNode {
@@ -50,9 +51,66 @@ export class Parser {
         return this.EmptyStatement();
       case TokenType.LEFT_BRACE:
         return this.BlockStatement();
+      case TokenType.LET:
+        return this.VariableStatement();
       default:
         return this.ExpressionStatement();
     }
+  }
+
+  /**
+   * VariableStatement
+   *  : 'let' VariableDeclarationList ';'
+   *  ;
+   */
+  private VariableStatement(): ASTNode {
+    this.eat(TokenType.LET);
+    const declarations = this.VariableDeclarationList();
+    this.eat(TokenType.SEMICOLON);
+    return ASTFactory.VariableStatement(declarations);
+  }
+
+  /**
+   * VariableDeclarationList
+   *  : VariableDeclaration
+   *  | VariableDeclarationList ',' VariableDeclaration
+   *  ;
+   */
+  private VariableDeclarationList(): ASTNode[] {
+    const declarations: ASTNode[] = [];
+
+    do {
+      declarations.push(this.VariableDeclaration());
+    } while (this.lookahead?.type === TokenType.COMMA && this.eat(TokenType.COMMA));
+
+    return declarations;
+  }
+
+  /**
+   * VariableDeclaration
+   *  : Identifier OptVariableInitializer
+   *  ;
+   */
+  private VariableDeclaration() : ASTNode {
+    const id = this.Identifier();
+
+    const init =
+      this.lookahead?.type !== TokenType.SEMICOLON &&
+      this.lookahead?.type !== TokenType.COMMA
+        ? this.VariableInitializer()
+        : null;
+
+    return ASTFactory.VariableDeclaration(id, init);
+  }
+
+  /**
+   * VariableInitializer
+   *  : SIMPLE_ASSIGN AssignmentExpression
+   *  ;
+   */
+  private VariableInitializer() {
+    this.eat(TokenType.SIMPLE_ASSIGN);
+    return this.AssignmentExpression();
   }
 
   /**

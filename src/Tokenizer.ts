@@ -4,7 +4,10 @@ export enum TokenType {
   RIGHT_BRACE = "}",
   LEFT_PAREN = "(",
   RIGHT_PAREN = ")",
-  
+  COMMA = ",",
+
+  LET = "let",
+
   SIMPLE_ASSIGN = "SIMPLE_ASSIGN",
   COMPLEX_ASSIGN = "COMPLEX_ASSIGN",
   ADDITIVE_OPERATOR = "ADDITIVE_OPERATOR",
@@ -28,6 +31,10 @@ const TokenSpec = [
   [/^\}/, TokenType.RIGHT_BRACE],
   [/^\(/, TokenType.LEFT_PAREN],
   [/^\)/, TokenType.RIGHT_PAREN],
+  [/^,/, TokenType.COMMA],
+
+  // keywrods
+  [/^\blet\b/, TokenType.LET],
 
   // assignment operators
   [/^=/, TokenType.SIMPLE_ASSIGN],

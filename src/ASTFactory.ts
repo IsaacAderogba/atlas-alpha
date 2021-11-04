@@ -5,6 +5,8 @@ export enum ASTNodeType {
   EmptyStatement = "EmptyStatement",
   BinaryExpression = "BinaryExpression",
   AssignmentExpression = "AssignmentExpression",
+  VariableStatement = "VariableStatement",
+  VariableDeclaration = "VariableDeclaration",
   Identifier = "Identifier",
   NumericLiteral = "NumericLiteral",
   StringLiteral = "StringLiteral",
@@ -47,11 +49,20 @@ export const ASTFactory: {
     left,
     right,
   }),
-  NumericLiteral: (value: number) => ({
+  VariableStatement: (declarations) => ({
+    type: ASTNodeType.VariableStatement,
+    declarations,
+  }),
+  VariableDeclaration: (id, init) => ({
+    type: ASTNodeType.VariableDeclaration,
+    id,
+    init,
+  }),
+  NumericLiteral: (value) => ({
     type: ASTNodeType.NumericLiteral,
     value,
   }),
-  StringLiteral: (value: string) => ({
+  StringLiteral: (value) => ({
     type: ASTNodeType.StringLiteral,
     value,
   }),
