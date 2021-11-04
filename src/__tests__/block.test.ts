@@ -1,4 +1,4 @@
-import { ASTNode } from "../ASTFactory";
+import { ASTNodeType } from "../ASTFactory";
 
 describe("Block tests", () => {
   it("should parse a block statement with 2 expression statements", () => {
@@ -12,22 +12,22 @@ describe("Block tests", () => {
     const ast = parser.parse(program);
 
     expect(ast).toEqual({
-      type: ASTNode.Program,
+      type: ASTNodeType.Program,
       body: [
         {
-          type: ASTNode.BlockStatement,
+          type: ASTNodeType.BlockStatement,
           body: [
             {
-              type: ASTNode.ExpressionStatement,
+              type: ASTNodeType.ExpressionStatement,
               expression: {
-                type: ASTNode.StringLiteral,
+                type: ASTNodeType.StringLiteral,
                 value: "hello",
               },
             },
             {
-              type: ASTNode.ExpressionStatement,
+              type: ASTNodeType.ExpressionStatement,
               expression: {
-                type: ASTNode.NumericLiteral,
+                type: ASTNodeType.NumericLiteral,
                 value: 42,
               },
             },
@@ -47,10 +47,10 @@ describe("Block tests", () => {
     const ast = parser.parse(program);
 
     expect(ast).toEqual({
-      type: ASTNode.Program,
+      type: ASTNodeType.Program,
       body: [
         {
-          type: ASTNode.BlockStatement,
+          type: ASTNodeType.BlockStatement,
           body: [],
         },
       ],
@@ -70,25 +70,25 @@ describe("Block tests", () => {
     const ast = parser.parse(program);
 
     expect(ast).toEqual({
-      type: ASTNode.Program,
+      type: ASTNodeType.Program,
       body: [
         {
-          type: ASTNode.BlockStatement,
+          type: ASTNodeType.BlockStatement,
           body: [
             {
-              type: ASTNode.BlockStatement,
+              type: ASTNodeType.BlockStatement,
               body: [
                 {
-                  type: ASTNode.ExpressionStatement,
+                  type: ASTNodeType.ExpressionStatement,
                   expression: {
-                    type: ASTNode.StringLiteral,
+                    type: ASTNodeType.StringLiteral,
                     value: "hello",
                   },
                 },
                 {
-                  type: ASTNode.ExpressionStatement,
+                  type: ASTNodeType.ExpressionStatement,
                   expression: {
-                    type: ASTNode.NumericLiteral,
+                    type: ASTNodeType.NumericLiteral,
                     value: 42,
                   },
                 },

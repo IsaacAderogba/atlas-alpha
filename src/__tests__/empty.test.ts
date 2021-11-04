@@ -1,6 +1,6 @@
-import { ASTNode } from "../ASTFactory";
+import { ASTNodeType } from "../ASTFactory";
 
-describe("Block tests", () => {
+describe("Empty tests", () => {
   it("should parse an empty statement", () => {
     const program = `
       ;
@@ -9,10 +9,10 @@ describe("Block tests", () => {
     const ast = parser.parse(program);
 
     expect(ast).toEqual({
-      type: ASTNode.Program,
+      type: ASTNodeType.Program,
       body: [
         {
-          type: ASTNode.EmptyStatement,
+          type: ASTNodeType.EmptyStatement,
         },
       ],
     });

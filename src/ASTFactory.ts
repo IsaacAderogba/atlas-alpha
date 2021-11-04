@@ -1,4 +1,4 @@
-export enum ASTNode {
+export enum ASTNodeType {
   Program = "Program",
   ExpressionStatement = "ExpressionStatement",
   BlockStatement = "BlockStatement",
@@ -7,37 +7,37 @@ export enum ASTNode {
   StringLiteral = "StringLiteral",
 }
 
-export type ASTNodeType = {
-  type: ASTNode;
+export type ASTNode = {
+  type: ASTNodeType;
   value?: any;
   body?: any;
   expression?: any;
 };
 
 export const ASTFactory: {
-  [key in keyof typeof ASTNode]: (value?: any) => ASTNodeType;
+  [key in keyof typeof ASTNodeType]: (value?: any) => ASTNode;
 } = {
   Program: (body: any) => ({
-    type: ASTNode.Program,
+    type: ASTNodeType.Program,
     body,
   }),
   NumericLiteral: (value: number) => ({
-    type: ASTNode.NumericLiteral,
+    type: ASTNodeType.NumericLiteral,
     value,
   }),
   StringLiteral: (value: string) => ({
-    type: ASTNode.StringLiteral,
+    type: ASTNodeType.StringLiteral,
     value,
   }),
   ExpressionStatement: (expression: string) => ({
-    type: ASTNode.ExpressionStatement,
+    type: ASTNodeType.ExpressionStatement,
     expression,
   }),
   BlockStatement: (body: string) => ({
-    type: ASTNode.BlockStatement,
+    type: ASTNodeType.BlockStatement,
     body,
   }),
   EmptyStatement: () => ({
-    type: ASTNode.EmptyStatement,
+    type: ASTNodeType.EmptyStatement,
   }),
 };

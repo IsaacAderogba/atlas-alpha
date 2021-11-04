@@ -1,4 +1,4 @@
-import { ASTNode } from "../ASTFactory";
+import { ASTNodeType } from "../ASTFactory";
 
 describe("Literals tests", () => {
   it("should parse 2 separate expression statements", () => {
@@ -10,19 +10,19 @@ describe("Literals tests", () => {
     const ast = parser.parse(program);
 
     expect(ast).toEqual({
-      type: ASTNode.Program,
+      type: ASTNodeType.Program,
       body: [
         {
-          type: ASTNode.ExpressionStatement,
+          type: ASTNodeType.ExpressionStatement,
           expression: {
-            type: ASTNode.StringLiteral,
+            type: ASTNodeType.StringLiteral,
             value: "hello",
           },
         },
         {
-          type: ASTNode.ExpressionStatement,
+          type: ASTNodeType.ExpressionStatement,
           expression: {
-            type: ASTNode.NumericLiteral,
+            type: ASTNodeType.NumericLiteral,
             value: 42,
           },
         },
