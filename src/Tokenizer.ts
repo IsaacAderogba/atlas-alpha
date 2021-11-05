@@ -4,7 +4,10 @@ export enum TokenType {
   RIGHT_BRACE = "}",
   LEFT_PAREN = "(",
   RIGHT_PAREN = ")",
+  LEFT_BRACKET = "[",
+  RIGHT_BRACKET = "]",
   COMMA = ",",
+  DOT = ".",
 
   LET = "let",
   IF = "if",
@@ -48,6 +51,9 @@ const TokenSpec = [
   [/^\(/, TokenType.LEFT_PAREN],
   [/^\)/, TokenType.RIGHT_PAREN],
   [/^,/, TokenType.COMMA],
+  [/^\./, TokenType.DOT],
+  [/^\[/, TokenType.LEFT_BRACKET],
+  [/^\]/, TokenType.RIGHT_BRACKET],
 
   // keywords
   [/^\blet\b/, TokenType.LET],

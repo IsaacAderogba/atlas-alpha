@@ -119,10 +119,11 @@ export class Parser {
    */
   private ReturnStatement() {
     this.eat(TokenType.RETURN);
-    const argument = this.lookahead?.type !== TokenType.SEMICOLON ? this.Expression() : null;
+    const argument =
+      this.lookahead?.type !== TokenType.SEMICOLON ? this.Expression() : null;
     this.eat(TokenType.SEMICOLON);
 
-    return ASTFactory.ReturnStatement(argument)
+    return ASTFactory.ReturnStatement(argument);
   }
 
   /**
@@ -392,7 +393,7 @@ export class Parser {
   }
 
   private checkValidAssignmentTarget(node: ASTNode) {
-    if (node.type === ASTNodeType.Identifier) {
+    if (node.type === ASTNodeType.Identifier || node.type === ASTNodeType.MemberExpression) {
       return node;
     }
     throw new SyntaxError("Invalid left-hand side in assignment expression");
@@ -550,11 +551,43 @@ export class Parser {
 
   /**
    * LeftHandSideExpression
-   *  : Identifier
+   *  : MemberExpression
    *  ;
    */
   private LeftHandSideExpression(): ASTNode {
-    return this.PrimaryExpression();
+    return this.MemberExpression();
+  }
+
+  /**
+   * MemberExpression
+   *  : PrimaryExpression
+   *  | MemberExpression '.' Identifier
+   *  | MemberExpression '[' Expression ']'
+   */
+  private MemberExpression(): ASTNode {
+    let object = this.PrimaryExpression();
+
+    while (
+      this.lookahead?.type === TokenType.DOT ||
+      this.lookahead?.type === TokenType.LEFT_BRACKET
+    ) {
+      if (this.lookahead.type === TokenType.DOT) {
+        this.eat(TokenType.DOT);
+        const property = this.Identifier();
+
+        object = ASTFactory.MemberExpression(false, object, property);
+      }
+
+      if (this.lookahead.type === TokenType.LEFT_BRACKET) {
+        this.eat(TokenType.LEFT_BRACKET);
+        const property = this.Expression();
+        this.eat(TokenType.RIGHT_BRACKET);
+
+        object = ASTFactory.MemberExpression(true, object, property);
+      }
+    }
+
+    return object;
   }
 
   /**
