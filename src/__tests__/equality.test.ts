@@ -1,6 +1,6 @@
 import { ASTNodeType } from "../ASTFactory";
 
-describe("Variable tests", () => {
+describe("Equality tests", () => {
   it("should parse equality blocks", () => {
     const program = `
       x > 0 == true;

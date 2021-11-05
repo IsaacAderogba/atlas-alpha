@@ -5,6 +5,7 @@ export enum ASTNodeType {
   EmptyStatement = "EmptyStatement",
   BinaryExpression = "BinaryExpression",
   LogicalExpression = "LogicalExpression",
+  UnaryExpression = "UnaryExpression",
   AssignmentExpression = "AssignmentExpression",
   VariableStatement = "VariableStatement",
   VariableDeclaration = "VariableDeclaration",
@@ -52,6 +53,11 @@ export const ASTFactory: {
     operator,
     left,
     right,
+  }),
+  UnaryExpression: (operator, argument) => ({
+    type: ASTNodeType.UnaryExpression,
+    operator,
+    argument,
   }),
   AssignmentExpression: (operator, left, right) => ({
     type: ASTNodeType.AssignmentExpression,

@@ -209,15 +209,6 @@ export class Parser {
   }
 
   /**
-   * LeftHandSideExpression
-   *  : Identifier
-   *  ;
-   */
-  private LeftHandSideExpression(): ASTNode {
-    return this.Identifier();
-  }
-
-  /**
    * Identifier
    *  : IDENTIFIER
    *  ;
@@ -321,13 +312,13 @@ export class Parser {
 
   /**
    * MultiplicativeExpression
-   *  : PrimaryExpression
-   *  | MultiplicativeExpression MULTIPLICATIVE_OPERATOR PrimaryExpression
+   *  : UnaryExpression
+   *  | MultiplicativeExpression MULTIPLICATIVE_OPERATOR UnaryExpression
    *  ;
    */
   private MultiplicativeExpression(): ASTNode {
     return this.BinaryExpression(
-      () => this.PrimaryExpression(),
+      () => this.UnaryExpression(),
       TokenType.MULTIPLICATIVE_OPERATOR
     );
   }
@@ -359,10 +350,45 @@ export class Parser {
   }
 
   /**
+   * UnaryExpression
+   *  : LeftHandSideExpression
+   *  | ADDITIVE_OPERATOR UnaryExpression
+   *  | LOGICAL_NOT UnaryExpression
+   *  ;
+   */
+  private UnaryExpression(): ASTNode {
+    let operator: Token["value"] | null = null;
+
+    switch (this.lookahead?.type) {
+      case TokenType.ADDITIVE_OPERATOR:
+        operator = this.eat(TokenType.ADDITIVE_OPERATOR).value;
+        break;
+      case TokenType.LOGICAL_NOT:
+        operator = this.eat(TokenType.LOGICAL_NOT).value;
+        break;
+    }
+
+    if (operator != null) {
+      return ASTFactory.UnaryExpression(operator, this.UnaryExpression());
+    }
+
+    return this.LeftHandSideExpression();
+  }
+
+  /**
+   * LeftHandSideExpression
+   *  : Identifier
+   *  ;
+   */
+  private LeftHandSideExpression(): ASTNode {
+    return this.PrimaryExpression();
+  }
+
+  /**
    * PrimaryExpression
    *  : Literal
    *  | ParenthesizedExpression
-   *  | LeftHandSideExpression
+   *  | Identifier
    *  ;
    */
   private PrimaryExpression(): ASTNode {
@@ -373,6 +399,8 @@ export class Parser {
     switch (this.lookahead?.type) {
       case TokenType.LEFT_PAREN:
         return this.ParenthesizedExpression();
+      case TokenType.IDENTIFIER:
+        return this.Identifier();
       default:
         return this.LeftHandSideExpression();
     }
