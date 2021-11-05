@@ -47,6 +47,7 @@ export class Parser {
    *  | IterationStatement
    *  | FunctionDeclaration
    *  | ReturnStatement
+   *  | ClassDeclaration
    *  ;
    */
   private Statement(): ASTNode {
@@ -63,6 +64,8 @@ export class Parser {
         return this.FunctionDeclaration();
       case TokenType.RETURN:
         return this.ReturnStatement();
+      case TokenType.CLASS:
+        return this.ClassDeclaration();
       case TokenType.DO:
       case TokenType.WHILE:
       case TokenType.FOR:
@@ -70,6 +73,32 @@ export class Parser {
       default:
         return this.ExpressionStatement();
     }
+  }
+
+  /**
+   * ClassDeclaration
+   *  : 'class' Identifier OptClassExtends BlockStatement
+   *  ;
+   */
+  private ClassDeclaration(): ASTNode {
+    this.eat(TokenType.CLASS);
+
+    const id = this.Identifier();
+    const superClass =
+      this.lookahead?.type === TokenType.EXTENDS ? this.ClassExtends() : null;
+    const body = this.BlockStatement();
+
+    return ASTFactory.ClassDeclaration(id, superClass, body);
+  }
+
+  /**
+   * ClassExtends
+   *  : 'extends' Identifier
+   *  ;
+   */
+  private ClassExtends() {
+    this.eat(TokenType.EXTENDS);
+    return this.Identifier();
   }
 
   /**
@@ -119,10 +148,11 @@ export class Parser {
    */
   private ReturnStatement() {
     this.eat(TokenType.RETURN);
-    const argument = this.lookahead?.type !== TokenType.SEMICOLON ? this.Expression() : null;
+    const argument =
+      this.lookahead?.type !== TokenType.SEMICOLON ? this.Expression() : null;
     this.eat(TokenType.SEMICOLON);
 
-    return ASTFactory.ReturnStatement(argument)
+    return ASTFactory.ReturnStatement(argument);
   }
 
   /**
@@ -392,7 +422,10 @@ export class Parser {
   }
 
   private checkValidAssignmentTarget(node: ASTNode) {
-    if (node.type === ASTNodeType.Identifier) {
+    if (
+      node.type === ASTNodeType.Identifier ||
+      node.type === ASTNodeType.MemberExpression
+    ) {
       return node;
     }
     throw new SyntaxError("Invalid left-hand side in assignment expression");
@@ -550,11 +583,113 @@ export class Parser {
 
   /**
    * LeftHandSideExpression
-   *  : Identifier
+   *  : CallMemberExpression
    *  ;
    */
   private LeftHandSideExpression(): ASTNode {
-    return this.PrimaryExpression();
+    return this.CallMemberExpression();
+  }
+
+  /**
+   * CallMemberExpression
+   *  : MemberExpression
+   *  | CallExpression
+   *  | Super
+   *  ;
+   */
+  private CallMemberExpression(): ASTNode {
+    if (this.lookahead?.type === TokenType.SUPER) {
+      return this.CallExpression(this.Super());
+    }
+
+    const member = this.MemberExpression();
+
+    if (this.lookahead?.type === TokenType.LEFT_PAREN) {
+      return this.CallExpression(member);
+    }
+
+    return member;
+  }
+
+  /**
+   * CallExpression
+   *  : MemberExpression
+   *  | CallExpression
+   *  ;
+   */
+  private CallExpression(callee: ASTNode): ASTNode {
+    let callExpression = ASTFactory.CallExpression(callee, this.Arguments());
+
+    if (this.lookahead?.type === TokenType.LEFT_PAREN) {
+      callExpression = this.CallExpression(callExpression);
+    }
+
+    return callExpression;
+  }
+
+  /**
+   * Arguments
+   *  : '(' OptArgumentList ')'
+   *  ;
+   */
+  private Arguments() {
+    this.eat(TokenType.LEFT_PAREN);
+    const argumentList =
+      this.lookahead?.type !== TokenType.RIGHT_PAREN ? this.ArgumentList() : [];
+    this.eat(TokenType.RIGHT_PAREN);
+
+    return argumentList;
+  }
+
+  /**
+   * ArgumentList
+   *  : AssignmentExpression
+   *  | ArgumentList ',' AssignmentExpression
+   *  ;
+   */
+  private ArgumentList() {
+    const argumentList: ASTNode[] = [];
+
+    do {
+      argumentList.push(this.AssignmentExpression());
+    } while (
+      this.lookahead?.type === TokenType.COMMA &&
+      this.eat(TokenType.COMMA)
+    );
+
+    return argumentList;
+  }
+
+  /**
+   * MemberExpression
+   *  : PrimaryExpression
+   *  | MemberExpression '.' Identifier
+   *  | MemberExpression '[' Expression ']'
+   */
+  private MemberExpression(): ASTNode {
+    let object = this.PrimaryExpression();
+
+    while (
+      this.lookahead?.type === TokenType.DOT ||
+      this.lookahead?.type === TokenType.LEFT_BRACKET
+    ) {
+      if (this.lookahead.type === TokenType.DOT) {
+        this.eat(TokenType.DOT);
+        const property = this.Identifier();
+
+        object = ASTFactory.MemberExpression(false, object, property);
+      }
+
+      if (this.lookahead.type === TokenType.LEFT_BRACKET) {
+        this.eat(TokenType.LEFT_BRACKET);
+        const property = this.Expression();
+        this.eat(TokenType.RIGHT_BRACKET);
+
+        object = ASTFactory.MemberExpression(true, object, property);
+      }
+    }
+
+    return object;
   }
 
   /**
@@ -562,6 +697,8 @@ export class Parser {
    *  : Literal
    *  | ParenthesizedExpression
    *  | Identifier
+   *  | ThisExpression
+   *  | NewExpression
    *  ;
    */
   private PrimaryExpression(): ASTNode {
@@ -574,9 +711,43 @@ export class Parser {
         return this.ParenthesizedExpression();
       case TokenType.IDENTIFIER:
         return this.Identifier();
+      case TokenType.THIS:
+        return this.ThisExpression();
+      case TokenType.NEW:
+        return this.NewExpression();
       default:
-        return this.LeftHandSideExpression();
+        throw new SyntaxError("Unexpected primary expression.");
     }
+  }
+
+  /**
+   * NewExpression
+   *  : 'new' MemberExpression Arguments
+   *  ;
+   */
+  private NewExpression() {
+    this.eat(TokenType.NEW);
+    return ASTFactory.NewExpression(this.MemberExpression(), this.Arguments());
+  }
+
+  /**
+   * ThisExpression
+   *  : 'this'
+   *  ;
+   */
+  private ThisExpression(): ASTNode {
+    this.eat(TokenType.THIS);
+    return ASTFactory.ThisExpression();
+  }
+
+  /**
+   * Super
+   *  : 'super'
+   *  ;
+   */
+  private Super() {
+    this.eat(TokenType.SUPER);
+    return ASTFactory.Super();
   }
 
   private isLiteral(tokenType: TokenType) {
