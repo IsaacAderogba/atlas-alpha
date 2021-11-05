@@ -10,6 +10,9 @@ export enum ASTNodeType {
   VariableStatement = "VariableStatement",
   VariableDeclaration = "VariableDeclaration",
   IfStatement = "IfStatement",
+  WhileStatement = "WhileStatement",
+  DoWhileStatement = "DoWhileStatement",
+  ForStatement = "ForStatement",
   Identifier = "Identifier",
   NumericLiteral = "NumericLiteral",
   StringLiteral = "StringLiteral",
@@ -79,6 +82,23 @@ export const ASTFactory: {
     test,
     consequent,
     alternate,
+  }),
+  WhileStatement: (test, body) => ({
+    type: ASTNodeType.WhileStatement,
+    test,
+    body,
+  }),
+  DoWhileStatement: (body, test) => ({
+    type: ASTNodeType.DoWhileStatement,
+    test,
+    body,
+  }),
+  ForStatement: (init, test, update, body) => ({
+    type: ASTNodeType.ForStatement,
+    init,
+    test,
+    update,
+    body,
   }),
   NumericLiteral: (value) => ({
     type: ASTNodeType.NumericLiteral,

@@ -12,6 +12,9 @@ export enum TokenType {
   TRUE = "true",
   FALSE = "false",
   NULL = "null",
+  WHILE = "while",
+  DO = "do",
+  FOR = "for",
 
   SIMPLE_ASSIGN = "SIMPLE_ASSIGN",
   COMPLEX_ASSIGN = "COMPLEX_ASSIGN",
@@ -51,6 +54,9 @@ const TokenSpec = [
   [/^\btrue\b/, TokenType.TRUE],
   [/^\bfalse\b/, TokenType.FALSE],
   [/^\bnull\b/, TokenType.NULL],
+  [/^\bwhile\b/, TokenType.WHILE],
+  [/^\bdo\b/, TokenType.DO],
+  [/^\bfor\b/, TokenType.FOR],
 
   // Equality Operators
   [/^[=!]=/, TokenType.EQUALITY_OPERATOR],

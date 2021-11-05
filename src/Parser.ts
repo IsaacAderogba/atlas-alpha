@@ -44,6 +44,7 @@ export class Parser {
    *  | EmptyStatement
    *  | VariableStatement
    *  | IfStatement
+   *  | IterationStatement
    *  ;
    */
   private Statement(): ASTNode {
@@ -56,9 +57,71 @@ export class Parser {
         return this.BlockStatement();
       case TokenType.LET:
         return this.VariableStatement();
+      case TokenType.DO:
+      case TokenType.WHILE:
+      case TokenType.FOR:
+        return this.IterationStatement();
       default:
         return this.ExpressionStatement();
     }
+  }
+
+  /**
+   * IterationStatement
+   *  : WhileStatement
+   *  | DoWhileStatement
+   *  | ForStatement
+   *  ;
+   */
+  private IterationStatement(): ASTNode {
+    switch (this.lookahead?.type) {
+      case TokenType.DO:
+        return this.DoWhileStatement();
+      case TokenType.WHILE:
+        return this.WhileStatement();
+      case TokenType.FOR:
+        return this.ForStatement();
+    }
+    throw new SyntaxError(
+      `Unexpected type "${this.lookahead?.type}", expected Iterator`
+    );
+  }
+
+  /**
+   * DoWhileStatement
+   *  : 'do' Statement 'while' '(' Expression ')' ';'
+   *  ;
+   */
+  private DoWhileStatement(): ASTNode {
+    this.eat(TokenType.DO);
+
+    const body = this.Statement();
+
+    this.eat(TokenType.WHILE);
+
+    this.eat(TokenType.LEFT_PAREN);
+    const test = this.Expression();
+    this.eat(TokenType.RIGHT_PAREN);
+
+    this.eat(TokenType.SEMICOLON);
+    return ASTFactory.DoWhileStatement(body, test);
+  }
+
+  /**
+   * WhileStatement
+   *  : 'while' '(' Expression ')' Statement
+   *  ;
+   */
+  private WhileStatement(): ASTNode {
+    this.eat(TokenType.WHILE);
+
+    this.eat(TokenType.LEFT_PAREN);
+    const test = this.Expression();
+    this.eat(TokenType.RIGHT_PAREN);
+
+    const body = this.Statement();
+
+    return ASTFactory.WhileStatement(test, body);
   }
 
   /**
@@ -84,15 +147,66 @@ export class Parser {
   }
 
   /**
+   * ForStatement
+   *  : 'for' '(' OptForStatementInit ';' OptExpression ';' OptExpression ')' Statement
+   *  ;
+   */
+  private ForStatement(): ASTNode {
+    this.eat(TokenType.FOR);
+    this.eat(TokenType.LEFT_PAREN);
+
+    const init =
+      this.lookahead?.type !== TokenType.SEMICOLON
+        ? this.ForStatementInit()
+        : null;
+    this.eat(TokenType.SEMICOLON);
+
+    const test =
+      this.lookahead?.type !== TokenType.SEMICOLON ? this.Expression() : null;
+    this.eat(TokenType.SEMICOLON);
+
+    const update =
+      this.lookahead?.type !== TokenType.RIGHT_PAREN ? this.Expression() : null;
+    this.eat(TokenType.RIGHT_PAREN);
+
+    const body = this.Statement();
+
+    return ASTFactory.ForStatement(init, test, update, body);
+  }
+
+  /**
+   * ForStatementInit
+   *  : VariableStatementInit
+   *  | Expression
+   *  ;
+   */
+  private ForStatementInit(): ASTNode {
+    if (this.lookahead?.type === TokenType.LET) {
+      return this.VariableStatementInit();
+    }
+    return this.Expression();
+  }
+
+  /**
+   * VariableStatementInit
+   *  : 'let' VariableDeclarationList
+   *  ;
+   */
+  private VariableStatementInit() {
+    this.eat(TokenType.LET);
+    const declarations = this.VariableDeclarationList();
+    return ASTFactory.VariableStatement(declarations);
+  }
+
+  /**
    * VariableStatement
-   *  : 'let' VariableDeclarationList ';'
+   *  : 'let' VariableStatementInit ';'
    *  ;
    */
   private VariableStatement(): ASTNode {
-    this.eat(TokenType.LET);
-    const declarations = this.VariableDeclarationList();
+    const variableStatement = this.VariableStatementInit();
     this.eat(TokenType.SEMICOLON);
-    return ASTFactory.VariableStatement(declarations);
+    return variableStatement;
   }
 
   /**
