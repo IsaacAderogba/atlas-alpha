@@ -7,11 +7,14 @@ export enum TokenType {
   COMMA = ",",
 
   LET = "let",
+  IF = "if",
+  ELSE = "else",
 
   SIMPLE_ASSIGN = "SIMPLE_ASSIGN",
   COMPLEX_ASSIGN = "COMPLEX_ASSIGN",
   ADDITIVE_OPERATOR = "ADDITIVE_OPERATOR",
   MULTIPLICATIVE_OPERATOR = "MULTIPLICATIVE_OPERATOR",
+  RELATIONAL_OPERATOR = "RELATIONAL_OPERATOR",
 
   NUMBER = "NUMBER",
   STRING = "STRING",
@@ -35,6 +38,8 @@ const TokenSpec = [
 
   // keywrods
   [/^\blet\b/, TokenType.LET],
+  [/^\bif\b/, TokenType.IF],
+  [/^\belse\b/, TokenType.ELSE],
 
   // assignment operators
   [/^=/, TokenType.SIMPLE_ASSIGN],
@@ -43,6 +48,9 @@ const TokenSpec = [
   // math operators
   [/^[+\-]/, TokenType.ADDITIVE_OPERATOR],
   [/^[*\/]/, TokenType.MULTIPLICATIVE_OPERATOR],
+
+  // relational operators
+  [/^[<>]=?/, TokenType.RELATIONAL_OPERATOR],
 
   // literals
   [/^\d+/, TokenType.NUMBER],

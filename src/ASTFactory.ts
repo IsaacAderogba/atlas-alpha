@@ -7,6 +7,7 @@ export enum ASTNodeType {
   AssignmentExpression = "AssignmentExpression",
   VariableStatement = "VariableStatement",
   VariableDeclaration = "VariableDeclaration",
+  IfStatement = "IfStatement",
   Identifier = "Identifier",
   NumericLiteral = "NumericLiteral",
   StringLiteral = "StringLiteral",
@@ -57,6 +58,12 @@ export const ASTFactory: {
     type: ASTNodeType.VariableDeclaration,
     id,
     init,
+  }),
+  IfStatement: (test, consequent, alternate) => ({
+    type: ASTNodeType.IfStatement,
+    test,
+    consequent,
+    alternate,
   }),
   NumericLiteral: (value) => ({
     type: ASTNodeType.NumericLiteral,

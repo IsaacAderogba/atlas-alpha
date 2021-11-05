@@ -43,12 +43,15 @@ export class Parser {
    *  | BlockStatement
    *  | EmptyStatement
    *  | VariableStatement
+   *  | IfStatement
    *  ;
    */
   private Statement(): ASTNode {
     switch (this.lookahead?.type) {
       case TokenType.SEMICOLON:
         return this.EmptyStatement();
+      case TokenType.IF:
+        return this.IfStatement();
       case TokenType.LEFT_BRACE:
         return this.BlockStatement();
       case TokenType.LET:
@@ -56,6 +59,28 @@ export class Parser {
       default:
         return this.ExpressionStatement();
     }
+  }
+
+  /**
+   * IfStatement
+   *  : 'if' '(' Expression ')' Statement
+   *  | 'if' '(' Expression ')' Statement 'else' Statement
+   *  ;
+   */
+  private IfStatement(): ASTNode {
+    this.eat(TokenType.IF);
+
+    this.eat(TokenType.LEFT_PAREN);
+    const test = this.Expression();
+    this.eat(TokenType.RIGHT_PAREN);
+
+    const consequent = this.Statement();
+    const alternate =
+      this.lookahead != null && this.lookahead.type === TokenType.ELSE
+        ? this.eat(TokenType.ELSE) && this.Statement()
+        : null;
+
+    return ASTFactory.IfStatement(test, consequent, alternate);
   }
 
   /**
@@ -81,7 +106,10 @@ export class Parser {
 
     do {
       declarations.push(this.VariableDeclaration());
-    } while (this.lookahead?.type === TokenType.COMMA && this.eat(TokenType.COMMA));
+    } while (
+      this.lookahead?.type === TokenType.COMMA &&
+      this.eat(TokenType.COMMA)
+    );
 
     return declarations;
   }
@@ -91,7 +119,7 @@ export class Parser {
    *  : Identifier OptVariableInitializer
    *  ;
    */
-  private VariableDeclaration() : ASTNode {
+  private VariableDeclaration(): ASTNode {
     const id = this.Identifier();
 
     const init =
@@ -162,12 +190,12 @@ export class Parser {
 
   /**
    * AssignmentExpression
-   *  : AdditiveExpression
+   *  : RelationalExpression
    *  | LeftHandSideExpression AssignmentOperator AssignmentExpression
    *  ;
    */
   private AssignmentExpression(): ASTNode {
-    const left = this.AdditiveExpression();
+    const left = this.RelationalExpression();
 
     if (!this.isAssignmentOperator(this.lookahead?.type!)) {
       return left;
@@ -224,6 +252,19 @@ export class Parser {
       return this.eat(TokenType.SIMPLE_ASSIGN);
     }
     return this.eat(TokenType.COMPLEX_ASSIGN);
+  }
+
+  /**
+   * RelationalExpression
+   *  : AdditiveExpression
+   *  | RelationalExpression RELATIONAL_OPERATOR AdditiveExpression
+   *  ;
+   */
+   private RelationalExpression(): ASTNode {
+    return this.BinaryExpression(
+      () => this.AdditiveExpression(),
+      TokenType.RELATIONAL_OPERATOR
+    );
   }
 
   /**
