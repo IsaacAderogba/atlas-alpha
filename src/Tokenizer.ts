@@ -20,6 +20,11 @@ export enum TokenType {
   FOR = "for",
   DEF = "def",
   RETURN = "return",
+  CLASS = "class",
+  EXTENDS = "extends",
+  SUPER = "super",
+  NEW = "new",
+  THIS = "this",
 
   SIMPLE_ASSIGN = "SIMPLE_ASSIGN",
   COMPLEX_ASSIGN = "COMPLEX_ASSIGN",
@@ -67,6 +72,11 @@ const TokenSpec = [
   [/^\bfor\b/, TokenType.FOR],
   [/^\bdef\b/, TokenType.DEF],
   [/^\breturn\b/, TokenType.RETURN],
+  [/^\bclass\b/, TokenType.CLASS],
+  [/^\bextends\b/, TokenType.EXTENDS],
+  [/^\bsuper\b/, TokenType.SUPER],
+  [/^\bnew\b/, TokenType.NEW],
+  [/^\bthis\b/, TokenType.THIS],
 
   // Equality Operators
   [/^[=!]=/, TokenType.EQUALITY_OPERATOR],

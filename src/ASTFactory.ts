@@ -9,6 +9,8 @@ export enum ASTNodeType {
   AssignmentExpression = "AssignmentExpression",
   MemberExpression = "MemberExpression",
   CallExpression = "CallExpression",
+  ThisExpression = "ThisExpression",
+  ClassDeclaration = "ClassDeclaration",
   VariableStatement = "VariableStatement",
   VariableDeclaration = "VariableDeclaration",
   FunctionDeclaration = "FunctionDeclaration",
@@ -22,6 +24,8 @@ export enum ASTNodeType {
   StringLiteral = "StringLiteral",
   BooleanLiteral = "BooleanLiteral",
   NullLiteral = "NullLiteral",
+  Super = "Super",
+  NewExpression="NewExpression"
 }
 
 export type ASTNode = {
@@ -83,6 +87,17 @@ export const ASTFactory: {
     callee,
     arguments: args,
   }),
+  NewExpression: (callee, args) => ({
+    type: ASTNodeType.NewExpression,
+    callee,
+    arguments: args,
+  }),
+  ThisExpression: () => ({
+    type: ASTNodeType.ThisExpression,
+  }),
+  Super: () => ({
+    type: ASTNodeType.Super,
+  }),
   VariableStatement: (declarations) => ({
     type: ASTNodeType.VariableStatement,
     declarations,
@@ -96,6 +111,12 @@ export const ASTFactory: {
     type: ASTNodeType.FunctionDeclaration,
     name,
     params,
+    body,
+  }),
+  ClassDeclaration: (id, superClass, body) => ({
+    type: ASTNodeType.ClassDeclaration,
+    id,
+    superClass,
     body,
   }),
   ReturnStatement: (argument) => ({

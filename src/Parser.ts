@@ -47,6 +47,7 @@ export class Parser {
    *  | IterationStatement
    *  | FunctionDeclaration
    *  | ReturnStatement
+   *  | ClassDeclaration
    *  ;
    */
   private Statement(): ASTNode {
@@ -63,6 +64,8 @@ export class Parser {
         return this.FunctionDeclaration();
       case TokenType.RETURN:
         return this.ReturnStatement();
+      case TokenType.CLASS:
+        return this.ClassDeclaration();
       case TokenType.DO:
       case TokenType.WHILE:
       case TokenType.FOR:
@@ -70,6 +73,32 @@ export class Parser {
       default:
         return this.ExpressionStatement();
     }
+  }
+
+  /**
+   * ClassDeclaration
+   *  : 'class' Identifier OptClassExtends BlockStatement
+   *  ;
+   */
+  private ClassDeclaration(): ASTNode {
+    this.eat(TokenType.CLASS);
+
+    const id = this.Identifier();
+    const superClass =
+      this.lookahead?.type === TokenType.EXTENDS ? this.ClassExtends() : null;
+    const body = this.BlockStatement();
+
+    return ASTFactory.ClassDeclaration(id, superClass, body);
+  }
+
+  /**
+   * ClassExtends
+   *  : 'extends' Identifier
+   *  ;
+   */
+  private ClassExtends() {
+    this.eat(TokenType.EXTENDS);
+    return this.Identifier();
   }
 
   /**
@@ -565,9 +594,14 @@ export class Parser {
    * CallMemberExpression
    *  : MemberExpression
    *  | CallExpression
+   *  | Super
    *  ;
    */
   private CallMemberExpression(): ASTNode {
+    if (this.lookahead?.type === TokenType.SUPER) {
+      return this.CallExpression(this.Super());
+    }
+
     const member = this.MemberExpression();
 
     if (this.lookahead?.type === TokenType.LEFT_PAREN) {
@@ -663,6 +697,8 @@ export class Parser {
    *  : Literal
    *  | ParenthesizedExpression
    *  | Identifier
+   *  | ThisExpression
+   *  | NewExpression
    *  ;
    */
   private PrimaryExpression(): ASTNode {
@@ -675,9 +711,43 @@ export class Parser {
         return this.ParenthesizedExpression();
       case TokenType.IDENTIFIER:
         return this.Identifier();
+      case TokenType.THIS:
+        return this.ThisExpression();
+      case TokenType.NEW:
+        return this.NewExpression();
       default:
-        return this.LeftHandSideExpression();
+        throw new SyntaxError("Unexpected primary expression.");
     }
+  }
+
+  /**
+   * NewExpression
+   *  : 'new' MemberExpression Arguments
+   *  ;
+   */
+  private NewExpression() {
+    this.eat(TokenType.NEW);
+    return ASTFactory.NewExpression(this.MemberExpression(), this.Arguments());
+  }
+
+  /**
+   * ThisExpression
+   *  : 'this'
+   *  ;
+   */
+  private ThisExpression(): ASTNode {
+    this.eat(TokenType.THIS);
+    return ASTFactory.ThisExpression();
+  }
+
+  /**
+   * Super
+   *  : 'super'
+   *  ;
+   */
+  private Super() {
+    this.eat(TokenType.SUPER);
+    return ASTFactory.Super();
   }
 
   private isLiteral(tokenType: TokenType) {
