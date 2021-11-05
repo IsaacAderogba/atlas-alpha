@@ -9,6 +9,8 @@ export enum ASTNodeType {
   AssignmentExpression = "AssignmentExpression",
   VariableStatement = "VariableStatement",
   VariableDeclaration = "VariableDeclaration",
+  FunctionDeclaration = "FunctionDeclaration",
+  ReturnStatement = "ReturnStatement",
   IfStatement = "IfStatement",
   WhileStatement = "WhileStatement",
   DoWhileStatement = "DoWhileStatement",
@@ -76,6 +78,16 @@ export const ASTFactory: {
     type: ASTNodeType.VariableDeclaration,
     id,
     init,
+  }),
+  FunctionDeclaration: (name, params, body) => ({
+    type: ASTNodeType.FunctionDeclaration,
+    name,
+    params,
+    body,
+  }),
+  ReturnStatement: (argument) => ({
+    type: ASTNodeType.ReturnStatement,
+    argument,
   }),
   IfStatement: (test, consequent, alternate) => ({
     type: ASTNodeType.IfStatement,

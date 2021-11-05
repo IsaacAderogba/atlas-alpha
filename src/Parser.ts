@@ -45,6 +45,8 @@ export class Parser {
    *  | VariableStatement
    *  | IfStatement
    *  | IterationStatement
+   *  | FunctionDeclaration
+   *  | ReturnStatement
    *  ;
    */
   private Statement(): ASTNode {
@@ -57,6 +59,10 @@ export class Parser {
         return this.BlockStatement();
       case TokenType.LET:
         return this.VariableStatement();
+      case TokenType.DEF:
+        return this.FunctionDeclaration();
+      case TokenType.RETURN:
+        return this.ReturnStatement();
       case TokenType.DO:
       case TokenType.WHILE:
       case TokenType.FOR:
@@ -64,6 +70,59 @@ export class Parser {
       default:
         return this.ExpressionStatement();
     }
+  }
+
+  /**
+   * FunctionDeclaration
+   *  : 'def' Identifier '(' OptFormalParameterList ')' BlockStatement
+   *  ;
+   */
+  private FunctionDeclaration() {
+    this.eat(TokenType.DEF);
+    const name = this.Identifier();
+    this.eat(TokenType.LEFT_PAREN);
+
+    const params =
+      this.lookahead?.type !== TokenType.RIGHT_PAREN
+        ? this.FormalParameterList()
+        : [];
+
+    this.eat(TokenType.RIGHT_PAREN);
+    const body = this.BlockStatement();
+
+    return ASTFactory.FunctionDeclaration(name, params, body);
+  }
+
+  /**
+   * FormalParameterList
+   *  : Identifier
+   *  | FormalParameterList ',' Identifier
+   *  ;
+   */
+  private FormalParameterList() {
+    const params: ASTNode[] = [];
+
+    do {
+      params.push(this.Identifier());
+    } while (
+      this.lookahead?.type === TokenType.COMMA &&
+      this.eat(TokenType.COMMA)
+    );
+
+    return params;
+  }
+
+  /**
+   * ReturnStatement
+   *  : 'return' OptExpression
+   *  ;
+   */
+  private ReturnStatement() {
+    this.eat(TokenType.RETURN);
+    const argument = this.lookahead?.type !== TokenType.SEMICOLON ? this.Expression() : null;
+    this.eat(TokenType.SEMICOLON);
+
+    return ASTFactory.ReturnStatement(argument)
   }
 
   /**

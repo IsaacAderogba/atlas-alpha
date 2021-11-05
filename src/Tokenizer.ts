@@ -15,6 +15,8 @@ export enum TokenType {
   WHILE = "while",
   DO = "do",
   FOR = "for",
+  DEF = "def",
+  RETURN = "return",
 
   SIMPLE_ASSIGN = "SIMPLE_ASSIGN",
   COMPLEX_ASSIGN = "COMPLEX_ASSIGN",
@@ -57,6 +59,8 @@ const TokenSpec = [
   [/^\bwhile\b/, TokenType.WHILE],
   [/^\bdo\b/, TokenType.DO],
   [/^\bfor\b/, TokenType.FOR],
+  [/^\bdef\b/, TokenType.DEF],
+  [/^\breturn\b/, TokenType.RETURN],
 
   // Equality Operators
   [/^[=!]=/, TokenType.EQUALITY_OPERATOR],
