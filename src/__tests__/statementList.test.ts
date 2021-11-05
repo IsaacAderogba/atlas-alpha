@@ -1,6 +1,6 @@
 import { ASTNodeType } from "../ASTFactory";
 
-describe("Literals tests", () => {
+describe("Statement List tests", () => {
   it("should parse 2 separate expression statements", () => {
     const program = `
       "hello";

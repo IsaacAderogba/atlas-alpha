@@ -4,8 +4,22 @@ export enum ASTNodeType {
   BlockStatement = "BlockStatement",
   EmptyStatement = "EmptyStatement",
   BinaryExpression = "BinaryExpression",
+  LogicalExpression = "LogicalExpression",
+  UnaryExpression = "UnaryExpression",
+  AssignmentExpression = "AssignmentExpression",
+  VariableStatement = "VariableStatement",
+  VariableDeclaration = "VariableDeclaration",
+  FunctionDeclaration = "FunctionDeclaration",
+  ReturnStatement = "ReturnStatement",
+  IfStatement = "IfStatement",
+  WhileStatement = "WhileStatement",
+  DoWhileStatement = "DoWhileStatement",
+  ForStatement = "ForStatement",
+  Identifier = "Identifier",
   NumericLiteral = "NumericLiteral",
   StringLiteral = "StringLiteral",
+  BooleanLiteral = "BooleanLiteral",
+  NullLiteral = "NullLiteral",
 }
 
 export type ASTNode = {
@@ -39,12 +53,83 @@ export const ASTFactory: {
     left,
     right,
   }),
-  NumericLiteral: (value: number) => ({
+  LogicalExpression: (operator, left, right) => ({
+    type: ASTNodeType.LogicalExpression,
+    operator,
+    left,
+    right,
+  }),
+  UnaryExpression: (operator, argument) => ({
+    type: ASTNodeType.UnaryExpression,
+    operator,
+    argument,
+  }),
+  AssignmentExpression: (operator, left, right) => ({
+    type: ASTNodeType.AssignmentExpression,
+    operator,
+    left,
+    right,
+  }),
+  VariableStatement: (declarations) => ({
+    type: ASTNodeType.VariableStatement,
+    declarations,
+  }),
+  VariableDeclaration: (id, init) => ({
+    type: ASTNodeType.VariableDeclaration,
+    id,
+    init,
+  }),
+  FunctionDeclaration: (name, params, body) => ({
+    type: ASTNodeType.FunctionDeclaration,
+    name,
+    params,
+    body,
+  }),
+  ReturnStatement: (argument) => ({
+    type: ASTNodeType.ReturnStatement,
+    argument,
+  }),
+  IfStatement: (test, consequent, alternate) => ({
+    type: ASTNodeType.IfStatement,
+    test,
+    consequent,
+    alternate,
+  }),
+  WhileStatement: (test, body) => ({
+    type: ASTNodeType.WhileStatement,
+    test,
+    body,
+  }),
+  DoWhileStatement: (body, test) => ({
+    type: ASTNodeType.DoWhileStatement,
+    test,
+    body,
+  }),
+  ForStatement: (init, test, update, body) => ({
+    type: ASTNodeType.ForStatement,
+    init,
+    test,
+    update,
+    body,
+  }),
+  NumericLiteral: (value) => ({
     type: ASTNodeType.NumericLiteral,
     value,
   }),
-  StringLiteral: (value: string) => ({
+  StringLiteral: (value) => ({
     type: ASTNodeType.StringLiteral,
     value,
+  }),
+  BooleanLiteral: (value) => ({
+    type: ASTNodeType.BooleanLiteral,
+    value,
+  }),
+  NullLiteral: () => ({
+    type: ASTNodeType.NullLiteral,
+    value: null,
+  }),
+  Identifier: (name) => ({
+    type: ASTNodeType.Identifier,
+    name,
   }),
 };
