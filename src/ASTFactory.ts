@@ -7,7 +7,8 @@ export enum ASTNodeType {
   LogicalExpression = "LogicalExpression",
   UnaryExpression = "UnaryExpression",
   AssignmentExpression = "AssignmentExpression",
-  MemberExpression="MemberExpression",
+  MemberExpression = "MemberExpression",
+  CallExpression = "CallExpression",
   VariableStatement = "VariableStatement",
   VariableDeclaration = "VariableDeclaration",
   FunctionDeclaration = "FunctionDeclaration",
@@ -76,6 +77,11 @@ export const ASTFactory: {
     computed,
     object,
     property,
+  }),
+  CallExpression: (callee, args) => ({
+    type: ASTNodeType.CallExpression,
+    callee,
+    arguments: args,
   }),
   VariableStatement: (declarations) => ({
     type: ASTNodeType.VariableStatement,

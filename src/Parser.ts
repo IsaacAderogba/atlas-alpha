@@ -393,7 +393,10 @@ export class Parser {
   }
 
   private checkValidAssignmentTarget(node: ASTNode) {
-    if (node.type === ASTNodeType.Identifier || node.type === ASTNodeType.MemberExpression) {
+    if (
+      node.type === ASTNodeType.Identifier ||
+      node.type === ASTNodeType.MemberExpression
+    ) {
       return node;
     }
     throw new SyntaxError("Invalid left-hand side in assignment expression");
@@ -551,11 +554,76 @@ export class Parser {
 
   /**
    * LeftHandSideExpression
-   *  : MemberExpression
+   *  : CallMemberExpression
    *  ;
    */
   private LeftHandSideExpression(): ASTNode {
-    return this.MemberExpression();
+    return this.CallMemberExpression();
+  }
+
+  /**
+   * CallMemberExpression
+   *  : MemberExpression
+   *  | CallExpression
+   *  ;
+   */
+  private CallMemberExpression(): ASTNode {
+    const member = this.MemberExpression();
+
+    if (this.lookahead?.type === TokenType.LEFT_PAREN) {
+      return this.CallExpression(member);
+    }
+
+    return member;
+  }
+
+  /**
+   * CallExpression
+   *  : MemberExpression
+   *  | CallExpression
+   *  ;
+   */
+  private CallExpression(callee: ASTNode): ASTNode {
+    let callExpression = ASTFactory.CallExpression(callee, this.Arguments());
+
+    if (this.lookahead?.type === TokenType.LEFT_PAREN) {
+      callExpression = this.CallExpression(callExpression);
+    }
+
+    return callExpression;
+  }
+
+  /**
+   * Arguments
+   *  : '(' OptArgumentList ')'
+   *  ;
+   */
+  private Arguments() {
+    this.eat(TokenType.LEFT_PAREN);
+    const argumentList =
+      this.lookahead?.type !== TokenType.RIGHT_PAREN ? this.ArgumentList() : [];
+    this.eat(TokenType.RIGHT_PAREN);
+
+    return argumentList;
+  }
+
+  /**
+   * ArgumentList
+   *  : AssignmentExpression
+   *  | ArgumentList ',' AssignmentExpression
+   *  ;
+   */
+  private ArgumentList() {
+    const argumentList: ASTNode[] = [];
+
+    do {
+      argumentList.push(this.AssignmentExpression());
+    } while (
+      this.lookahead?.type === TokenType.COMMA &&
+      this.eat(TokenType.COMMA)
+    );
+
+    return argumentList;
   }
 
   /**
