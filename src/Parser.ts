@@ -190,12 +190,12 @@ export class Parser {
 
   /**
    * AssignmentExpression
-   *  : RelationalExpression
+   *  : LogicalORExpression
    *  | LeftHandSideExpression AssignmentOperator AssignmentExpression
    *  ;
    */
   private AssignmentExpression(): ASTNode {
-    const left = this.RelationalExpression();
+    const left = this.LogicalORExpression();
 
     if (!this.isAssignmentOperator(this.lookahead?.type!)) {
       return left;
@@ -255,12 +255,51 @@ export class Parser {
   }
 
   /**
+   * LogicalORExpression
+   *  : EqualityExpression LOGICAL_OR LogicalORExpression
+   *  | EqualityExpression
+   *  ;
+   */
+  private LogicalORExpression() {
+    return this.LogicalExpression(
+      () => this.LogicalANDExpression(),
+      TokenType.LOGICAL_OR
+    );
+  }
+
+  /**
+   * LogicalANDExpression
+   *  : EqualityExpression LOGICAL_AND LogicalANDExpression
+   *  | EqualityExpression
+   *  ;
+   */
+  private LogicalANDExpression() {
+    return this.LogicalExpression(
+      () => this.EqualityExpression(),
+      TokenType.LOGICAL_AND
+    );
+  }
+
+  /**
+   * EqualityExpression
+   *  : RelationalExpression
+   *  | EqualityExpression RELATIONAL_OPERATOR RelationalExpression
+   *  ;
+   */
+  private EqualityExpression(): ASTNode {
+    return this.BinaryExpression(
+      () => this.RelationalExpression(),
+      TokenType.EQUALITY_OPERATOR
+    );
+  }
+
+  /**
    * RelationalExpression
    *  : AdditiveExpression
    *  | RelationalExpression RELATIONAL_OPERATOR AdditiveExpression
    *  ;
    */
-   private RelationalExpression(): ASTNode {
+  private RelationalExpression(): ASTNode {
     return this.BinaryExpression(
       () => this.AdditiveExpression(),
       TokenType.RELATIONAL_OPERATOR
@@ -291,6 +330,19 @@ export class Parser {
       () => this.PrimaryExpression(),
       TokenType.MULTIPLICATIVE_OPERATOR
     );
+  }
+
+  private LogicalExpression(callback: () => ASTNode, operatorToken: TokenType) {
+    let left = callback();
+
+    while (this.lookahead?.type === operatorToken) {
+      const operator = this.eat(operatorToken).value;
+      const right = callback();
+
+      left = ASTFactory.LogicalExpression(operator, left, right);
+    }
+
+    return left;
   }
 
   private BinaryExpression(callback: () => ASTNode, operatorToken: TokenType) {
@@ -327,7 +379,13 @@ export class Parser {
   }
 
   private isLiteral(tokenType: TokenType) {
-    return tokenType === TokenType.NUMBER || tokenType === TokenType.STRING;
+    return [
+      TokenType.NUMBER,
+      TokenType.STRING,
+      TokenType.TRUE,
+      TokenType.FALSE,
+      TokenType.NULL,
+    ].includes(tokenType);
   }
 
   /**
@@ -347,6 +405,8 @@ export class Parser {
    * Literal
    *  : NumericLiteral
    *  | StringLiteral
+   *  | BooleanLiteral
+   *  | NullLiteral
    *  ;
    */
   private Literal(): ASTNode {
@@ -355,9 +415,37 @@ export class Parser {
         return this.NumericLiteral();
       case TokenType.STRING:
         return this.StringLiteral();
+      case TokenType.TRUE:
+        return this.BooleanLiteral(true);
+      case TokenType.FALSE:
+        return this.BooleanLiteral(false);
+      case TokenType.NULL:
+        return this.NullLiteral();
       default:
         throw new SyntaxError(`Literal: unexpected literal production`);
     }
+  }
+
+  /**
+   * BooleanLiteral
+   *  : 'true'
+   *  | 'false'
+   *  ;
+   */
+  private BooleanLiteral(value: boolean): ASTNode {
+    this.eat(value ? TokenType.TRUE : TokenType.FALSE);
+    return ASTFactory.BooleanLiteral(value);
+  }
+
+  /**
+   * NullLiteral
+   *  : 'true'
+   *  | 'false'
+   *  ;
+   */
+  private NullLiteral(): ASTNode {
+    this.eat(TokenType.NULL);
+    return ASTFactory.NullLiteral();
   }
 
   /**

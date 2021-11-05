@@ -9,12 +9,20 @@ export enum TokenType {
   LET = "let",
   IF = "if",
   ELSE = "else",
+  TRUE = "true",
+  FALSE = "false",
+  NULL = "null",
 
   SIMPLE_ASSIGN = "SIMPLE_ASSIGN",
   COMPLEX_ASSIGN = "COMPLEX_ASSIGN",
   ADDITIVE_OPERATOR = "ADDITIVE_OPERATOR",
   MULTIPLICATIVE_OPERATOR = "MULTIPLICATIVE_OPERATOR",
   RELATIONAL_OPERATOR = "RELATIONAL_OPERATOR",
+  EQUALITY_OPERATOR = "EQUALITY_OPERATOR",
+
+  LOGICAL_AND = "LOGICAL_AND",
+  LOGICAL_OR = "LOGICAL_OR",
+  LOGICAL_NOT = "LOGICAL_NOT",
 
   NUMBER = "NUMBER",
   STRING = "STRING",
@@ -36,10 +44,16 @@ const TokenSpec = [
   [/^\)/, TokenType.RIGHT_PAREN],
   [/^,/, TokenType.COMMA],
 
-  // keywrods
+  // keywords
   [/^\blet\b/, TokenType.LET],
   [/^\bif\b/, TokenType.IF],
   [/^\belse\b/, TokenType.ELSE],
+  [/^\btrue\b/, TokenType.TRUE],
+  [/^\bfalse\b/, TokenType.FALSE],
+  [/^\bnull\b/, TokenType.NULL],
+
+  // Equality Operators
+  [/^[=!]=/, TokenType.EQUALITY_OPERATOR],
 
   // assignment operators
   [/^=/, TokenType.SIMPLE_ASSIGN],
@@ -51,6 +65,11 @@ const TokenSpec = [
 
   // relational operators
   [/^[<>]=?/, TokenType.RELATIONAL_OPERATOR],
+
+  // Logical Operators
+  [/^&&/, TokenType.LOGICAL_AND],
+  [/^\|\|/, TokenType.LOGICAL_OR],
+  [/^!/, TokenType.LOGICAL_NOT],
 
   // literals
   [/^\d+/, TokenType.NUMBER],

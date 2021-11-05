@@ -4,6 +4,7 @@ export enum ASTNodeType {
   BlockStatement = "BlockStatement",
   EmptyStatement = "EmptyStatement",
   BinaryExpression = "BinaryExpression",
+  LogicalExpression = "LogicalExpression",
   AssignmentExpression = "AssignmentExpression",
   VariableStatement = "VariableStatement",
   VariableDeclaration = "VariableDeclaration",
@@ -11,6 +12,8 @@ export enum ASTNodeType {
   Identifier = "Identifier",
   NumericLiteral = "NumericLiteral",
   StringLiteral = "StringLiteral",
+  BooleanLiteral = "BooleanLiteral",
+  NullLiteral = "NullLiteral",
 }
 
 export type ASTNode = {
@@ -44,6 +47,12 @@ export const ASTFactory: {
     left,
     right,
   }),
+  LogicalExpression: (operator, left, right) => ({
+    type: ASTNodeType.LogicalExpression,
+    operator,
+    left,
+    right,
+  }),
   AssignmentExpression: (operator, left, right) => ({
     type: ASTNodeType.AssignmentExpression,
     operator,
@@ -72,6 +81,14 @@ export const ASTFactory: {
   StringLiteral: (value) => ({
     type: ASTNodeType.StringLiteral,
     value,
+  }),
+  BooleanLiteral: (value) => ({
+    type: ASTNodeType.BooleanLiteral,
+    value,
+  }),
+  NullLiteral: () => ({
+    type: ASTNodeType.NullLiteral,
+    value: null,
   }),
   Identifier: (name) => ({
     type: ASTNodeType.Identifier,
