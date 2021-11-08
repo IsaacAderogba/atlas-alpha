@@ -1,5 +1,5 @@
 {
-  "name": "atlas-alpha",
+  "name": "atlas-parser",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -16,15 +16,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/IsaacAderogba/atlas-alpha.git"
+    "url": "git+https://github.com/IsaacAderogba/atlas-parser.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/IsaacAderogba/atlas-alpha/issues"
+    "url": "https://github.com/IsaacAderogba/atlas-parser/issues"
   },
-  "homepage": "https://github.com/IsaacAderogba/atlas-alpha#readme",
+  "homepage": "https://github.com/IsaacAderogba/atlas-parser#readme",
   "devDependencies": {
     "@types/jest": "^27.0.2",
     "@types/node": "^16.11.6",
